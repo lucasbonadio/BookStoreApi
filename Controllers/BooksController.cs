@@ -151,7 +151,7 @@ namespace BookStoreApi.Controllers
 
             if (book == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Livro não encontrado." });
             }
 
             _context.Books.Remove(book);

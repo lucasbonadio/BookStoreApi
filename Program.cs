@@ -13,6 +13,22 @@ builder.Services.AddDbContext<APIDbContext>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<APIDbContext>();
+        // Aplica migrações pendentes automaticamente ao iniciar
+        context.Database.Migrate(); 
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao migrar o banco de dados.");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
