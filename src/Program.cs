@@ -1,8 +1,10 @@
 using BookStoreApi.Data;
 using Microsoft.EntityFrameworkCore;
+using BookStoreApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();

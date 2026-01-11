@@ -1,9 +1,6 @@
-// Controllers/BooksController.cs
-using BookStoreApi.Data;
 using BookStoreApi.Dtos;
-using BookStoreApi.Models;
+using BookStoreApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApi.Controllers
 {
@@ -11,151 +8,58 @@ namespace BookStoreApi.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly APIDbContext _context;
+        private readonly IBookService _service;
 
-        public BooksController(APIDbContext context)
+        public BooksController(IBookService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadBookDto>>> GetBooks()
         {
-            var books = await _context.Books.Select(b => new ReadBookDto
-            {
-                Id = b.Id,
-                Title = b.Title,
-                Author = b.Author,
-                Description = b.Description,
-                PublicationDate = b.PublicationDate,
-                CoverImage = b.CoverImage
-            })
-                .ToListAsync();
-
-            if (books == null || books.Count == 0)
+            var books = await _service.GetAllAsync();
+            if (!books.Any())
             {
                 return NotFound(new { Message = "Nenhum livro encontrado." });
             }
-
-            return books;
+            return Ok(books);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadBookDto>> GetBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-
-            if (book == null)
-            {
-                return NotFound(new { Message = "Livro não encontrado." });
-            }
-
-            var bookDto = new ReadBookDto
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Author = book.Author,
-                Description = book.Description,
-                PublicationDate = book.PublicationDate,
-                CoverImage = book.CoverImage
-            };
-
-            return bookDto;
+            var book = await _service.GetByIdAsync(id);
+            if (book == null) return NotFound(new { Message = "Livro não encontrado." });
+            return Ok(book);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook([FromForm] CreateBookDto book)
+        public async Task<ActionResult<ReadBookDto>> PostBook([FromForm] CreateBookDto bookDto)
         {
-            var newBook = new Book
-            {
-                Title = book.Title,
-                Author = book.Author,
-                Description = book.Description,
-                PublicationDate = book.PublicationDate,
-            };
-
-            if (book.CoverImage != null)
-            {
-                using var memoryStream = new MemoryStream();
-                await book.CoverImage.CopyToAsync(memoryStream);
-                newBook.CoverImage = memoryStream.ToArray();
-            }
-
-            _context.Books.Add(newBook);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
+            var createdBook = await _service.CreateAsync(bookDto);
+            
+            return CreatedAtAction(nameof(GetBook), new { id = createdBook.Id }, createdBook);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ReadBookDto>> PutBook(int id, [FromForm] UpdateBookDto book)
+        public async Task<ActionResult<ReadBookDto>> PutBook(int id, [FromForm] UpdateBookDto bookDto)
         {
-            var bookToUpdate = await _context.Books.FindAsync(id);
+            var updatedBook = await _service.UpdateAsync(id, bookDto);
+            
+            if (updatedBook == null) 
+                return NotFound(new { Message = "Livro não encontrado para atualização." });
 
-
-            if (bookToUpdate == null)
-            {
-                return NotFound(new { Message = "Livro não encontrado." });
-            }
-
-
-            bookToUpdate.Title = book.Title ?? bookToUpdate.Title;
-            bookToUpdate.Author = book.Author ?? bookToUpdate.Author;
-            bookToUpdate.Description = book.Description ?? bookToUpdate.Description;
-
-            if (book.PublicationDate.HasValue)
-            {
-                bookToUpdate.PublicationDate = book.PublicationDate.Value;
-            }
-
-            if (book.CoverImage != null)
-            {
-                using var memoryStream = new MemoryStream();
-                await book.CoverImage.CopyToAsync(memoryStream);
-                bookToUpdate.CoverImage = memoryStream.ToArray();
-            }
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Books.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            var response = new ReadBookDto
-            {
-                Id = bookToUpdate.Id,
-                Title = bookToUpdate.Title,
-                Author = bookToUpdate.Author,
-                Description = bookToUpdate.Description,
-                PublicationDate = bookToUpdate.PublicationDate,
-                CoverImage = bookToUpdate.CoverImage
-            };
-
-            return Ok(response);
+            return Ok(updatedBook);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-
-            if (book == null)
-            {
+            var success = await _service.DeleteAsync(id);
+            
+            if (!success) 
                 return NotFound(new { Message = "Livro não encontrado." });
-            }
-
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Livro deletado com sucesso." });
         }

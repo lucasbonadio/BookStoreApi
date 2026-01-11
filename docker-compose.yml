@@ -29,7 +29,6 @@ services:
     ports:
       - "5000:8080"
     environment:
-      # IMPORTANTE: A connection string deve apontar para "Server=db" (nome do serviço acima)
       - ConnectionStrings__DefaultConnection=Server=db;Database=BookStore;User=root;Password=admin;
       - ASPNETCORE_ENVIRONMENT=Development
 
