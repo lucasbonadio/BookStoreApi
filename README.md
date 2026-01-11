@@ -104,10 +104,12 @@ A API documentada via Swagger possui os seguintes endpoints principais:
 
 ## 🛠 Estrutura do Projeto
 
-* **Controllers:** Gerenciam as requisições HTTP e respostas.
-* **Models:** Representam as tabelas do banco de dados (`Book`).
-* **Dtos:** (Data Transfer Objects) Objetos simplificados para entrada e saída de dados, garantindo segurança e validação.
-    * `CreateBookDto`: Validações obrigatórias para cadastro.
-    * `UpdateBookDto`: Campos opcionais para atualização parcial.
-    * `ReadBookDto`: Formato de entrega dos dados para o Front-end.
-* **Data:** Contexto do Banco de Dados (`AppDbContext`) e Migrações.
+* **Controllers:** Responsáveis exclusivamente por lidar com as requisições HTTP (entrada) e devolver os status codes corretos (saída). Não possuem regras de negócio, apenas delegam chamadas para os Services.
+* **Services:** Camada onde reside a **Lógica de Negócio**. Responsável por processar os dados, realizar validações lógicas e fazer o mapeamento entre DTOs e Entidades.
+* **Interfaces:** Definem os contratos dos serviços (ex: `IBookService`), permitindo o uso de **Injeção de Dependência** e facilitando a criação de testes unitários.
+* **Models:** Representam as entidades do domínio e as tabelas do banco de dados (ex: `Book`).
+* **DTOs (Data Transfer Objects):** Objetos utilizados para transportar dados entre as camadas, prevenindo a exposição direta das entidades do banco (Over-posting).
+    * `CreateBookDto`: Contrato para criação.
+    * `UpdateBookDto`: Contrato para atualização.
+    * `ReadBookDto`: Contrato de resposta (leitura).
+* **Data:** Configuração do contexto do Entity Framework e acesso ao banco de dados.
