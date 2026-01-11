@@ -1,6 +1,7 @@
 using BookStoreApi.Data;
 using Microsoft.EntityFrameworkCore;
 using BookStoreApi.Services;
+using BookStoreApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AllowAll");
 app.MapControllers();
 app.Run();
