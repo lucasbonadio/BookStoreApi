@@ -1,18 +1,24 @@
-# Estágio 1: Build (Compilação)
+# Estágio 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copia o arquivo de projeto e restaura as dependências
-COPY ["BookStoreApi.csproj", "./"]
-RUN dotnet restore "BookStoreApi.csproj"
+# 1. Copia APENAS o csproj primeiro (para cachear as dependências)
+# Note que agora incluímos o caminho "src/BookStoreApi/"
+COPY ["src/BookStoreApi/BookStoreApi.csproj", "src/BookStoreApi/"]
 
-# Copia todo o resto do código
+# 2. Restaura as dependências
+RUN dotnet restore "src/BookStoreApi/BookStoreApi.csproj"
+
+# 3. Copia todo o resto do código da solução
 COPY . .
 
-# Compila para produção
+# 4. Define o diretório de trabalho para a pasta do projeto antes de publicar
+WORKDIR "/app/src/BookStoreApi"
+
+# 5. Compila para produção
 RUN dotnet publish "BookStoreApi.csproj" -c Release -o /app/publish
 
-# Estágio 2: Runtime (Execução - Imagem mais leve)
+# Estágio 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 EXPOSE 8080
@@ -20,5 +26,4 @@ EXPOSE 8080
 # Copia os arquivos compilados do estágio anterior
 COPY --from=build /app/publish .
 
-# Comando que inicia a API
 ENTRYPOINT ["dotnet", "BookStoreApi.dll"]

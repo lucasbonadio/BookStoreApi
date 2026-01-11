@@ -1,6 +1,8 @@
 # 📚 BookStore API
 
-API RESTful desenvolvida em .NET 8 para gerenciamento de uma livraria. O projeto permite operações completas de CRUD (Criar, Ler, Atualizar, Deletar) de livros, incluindo suporte para **upload de imagens de capa** e armazenamento seguro em banco de dados MySQL.
+API RESTful desenvolvida em .NET 8 para gerenciamento de uma livraria. O projeto adota boas práticas de arquitetura, separando a aplicação em camadas e incluindo **Testes de Integração** para garantir a confiabilidade dos endpoints.
+
+O sistema permite operações completas de CRUD (Criar, Ler, Atualizar, Deletar) de livros, com destaque para o **upload de imagens de capa** e armazenamento seguro em banco de dados MySQL.
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -9,6 +11,7 @@ API RESTful desenvolvida em .NET 8 para gerenciamento de uma livraria. O projeto
 * **ORM:** Entity Framework Core
 * **Containerização:** Docker & Docker Compose
 * **Documentação:** Swagger (OpenAPI)
+* **Arquitetura:** Separação de responsabilidades (src/tests)
 
 ---
 
@@ -64,6 +67,20 @@ Caso queira rodar sem o Docker (apenas com o .NET instalado):
     dotnet watch run
     ```
     A API estará disponível geralmente em `http://localhost:5xxx` (verifique o terminal).
+
+---
+
+## 🧪 Como rodar os Testes
+
+O projeto conta com uma suíte de testes automatizados para validar o comportamento da API.
+
+1.  **Na raiz do projeto, execute:**
+
+    ```bash
+    dotnet test
+    ```
+
+Isso irá compilar a aplicação e rodar todos os testes localizados na pasta `tests/`, exibindo o relatório de sucesso/falha no terminal.
 
 ---
 

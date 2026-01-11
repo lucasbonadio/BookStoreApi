@@ -11,7 +11,6 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    # HEALTHCHECK PARA O BANCO 
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
@@ -19,7 +18,9 @@ services:
 
   # Serviço API
   api:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: bookstore_api
     restart: on-failure
     depends_on:
@@ -28,6 +29,7 @@ services:
     ports:
       - "5000:8080"
     environment:
+      # IMPORTANTE: A connection string deve apontar para "Server=db" (nome do serviço acima)
       - ConnectionStrings__DefaultConnection=Server=db;Database=BookStore;User=root;Password=admin;
       - ASPNETCORE_ENVIRONMENT=Development
 
