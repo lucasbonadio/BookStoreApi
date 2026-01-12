@@ -62,7 +62,7 @@ Caso queira rodar sem o Docker (apenas com o .NET instalado):
     dotnet ef database update
     ```
 
-3.  **Execute a API:**
+3.  **Execute a API na pasta src:**
     ```bash
     dotnet watch run
     ```
